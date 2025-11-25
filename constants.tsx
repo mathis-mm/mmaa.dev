@@ -50,15 +50,6 @@ export const PROJECTS: Project[] = [
     featured: true,
   },
   {
-    id: '2',
-    title: 'VulnTrack',
-    description: 'Automated vulnerability scanning pipeline for CI/CD workflows.',
-    tags: ['Security', 'Go', 'Docker'],
-    imageUrl: 'https://picsum.photos/400/300?blur=2',
-    link: '#',
-    featured: false,
-  },
-  {
     id: '3',
     title: 'EtherWallet',
     description: 'Non-custodial crypto wallet with social recovery features.',
