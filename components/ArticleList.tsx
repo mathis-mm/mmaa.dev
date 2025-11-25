@@ -74,13 +74,6 @@ export const ArticleList: React.FC<ArticleListProps> = ({ articles, onBack }) =>
                     {selectedArticle.content}
                 </p>
             </div>
-            
-            {/* Signature Footer */}
-            <div className="mt-16 pt-8 border-t border-white/5 flex items-center gap-4 opacity-50">
-               <div className="h-px bg-gradient-to-r from-transparent via-neutral-500 to-transparent flex-1" />
-               <div className="font-mono text-xs text-neutral-500">SIGNED WITH PGP KEY ID: O6Nx/1O/mr</div>
-               <div className="h-px bg-gradient-to-r from-transparent via-neutral-500 to-transparent flex-1" />
-            </div>
           </div>
         </div>
 
