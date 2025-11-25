@@ -1,8 +1,9 @@
+
 import React, { useState } from 'react';
 import { Article } from '../types';
 import { BentoCard } from './BentoCard';
-import { X, Clock, Calendar, ChevronRight } from 'lucide-react';
- 
+import { X, Clock, Calendar, ChevronRight, ShieldCheck, Copy, Check } from 'lucide-react';
+import { PGP_PUBLIC_KEY } from '../constants';
 
 interface ArticleListProps {
   articles: Article[];
@@ -12,14 +13,23 @@ interface ArticleListProps {
 export const ArticleList: React.FC<ArticleListProps> = ({ articles, onBack }) => {
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   
+  // PGP Modal State
+  const [showPgp, setShowPgp] = useState(false);
+  const [copiedPgp, setCopiedPgp] = useState(false);
 
   const clearSelection = () => {
     setSelectedArticle(null);
   };
 
+  const handleCopyPgp = () => {
+    navigator.clipboard.writeText(PGP_PUBLIC_KEY);
+    setCopiedPgp(true);
+    setTimeout(() => setCopiedPgp(false), 2000);
+  };
+
   if (selectedArticle) {
     return (
-      <div className="w-full max-w-4xl mx-auto animate-fadeIn">
+      <div className="w-full max-w-4xl mx-auto animate-fadeIn relative">
         <button 
           onClick={clearSelection}
           className="mb-6 flex items-center text-neutral-400 hover:text-white transition-colors"
@@ -44,12 +54,19 @@ export const ArticleList: React.FC<ArticleListProps> = ({ articles, onBack }) =>
               {selectedArticle.title}
             </h1>
 
-            <div className="flex items-center gap-6 text-sm text-neutral-500 mb-8 border-b border-white/5 pb-8">
-               <span className="flex items-center gap-2"><Calendar size={16}/> {selectedArticle.date}</span>
-               <span className="flex items-center gap-2"><Clock size={16}/> {selectedArticle.readTime}</span>
+            <div className="flex flex-wrap items-center justify-between gap-4 text-sm text-neutral-500 mb-8 border-b border-white/5 pb-8">
+               <div className="flex items-center gap-6">
+                 <span className="flex items-center gap-2"><Calendar size={16}/> {selectedArticle.date}</span>
+                 <span className="flex items-center gap-2"><Clock size={16}/> {selectedArticle.readTime}</span>
+               </div>
+               
+               <button 
+                 onClick={() => setShowPgp(true)}
+                 className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-900/20 text-green-400 border border-green-900/30 hover:bg-green-900/30 transition-colors text-xs font-medium cursor-pointer"
+               >
+                 <ShieldCheck size={14} /> Verified Author
+               </button>
             </div>
-
-            
 
             {/* Content Body */}
             <div className="prose prose-invert prose-lg max-w-none text-neutral-400">
@@ -57,8 +74,63 @@ export const ArticleList: React.FC<ArticleListProps> = ({ articles, onBack }) =>
                     {selectedArticle.content}
                 </p>
             </div>
+            
+            {/* Signature Footer */}
+            <div className="mt-16 pt-8 border-t border-white/5 flex items-center gap-4 opacity-50">
+               <div className="h-px bg-gradient-to-r from-transparent via-neutral-500 to-transparent flex-1" />
+               <div className="font-mono text-xs text-neutral-500">SIGNED WITH PGP KEY ID: O6Nx/1O/mr</div>
+               <div className="h-px bg-gradient-to-r from-transparent via-neutral-500 to-transparent flex-1" />
+            </div>
           </div>
         </div>
+
+        {/* PGP MODAL */}
+        {showPgp && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
+             <div className="bg-neutral-900 border border-white/10 rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative">
+                <button 
+                  onClick={() => setShowPgp(false)}
+                  className="absolute top-4 right-4 p-2 text-neutral-500 hover:text-white transition-colors"
+                >
+                  <X size={20} />
+                </button>
+
+                <div className="flex items-center gap-3 mb-6">
+                   <div className="p-3 bg-green-500/10 text-green-500 rounded-xl">
+                      <ShieldCheck size={24} />
+                   </div>
+                   <div>
+                      <h3 className="text-xl font-bold text-white">PGP Public Key</h3>
+                      <p className="text-sm text-neutral-400">Fingerprint: O6Nx / 1O / mr</p>
+                   </div>
+                </div>
+
+                <div className="relative group">
+                   <div className="absolute top-2 right-2 z-10">
+                      <button 
+                        onClick={handleCopyPgp}
+                        className="p-2 bg-neutral-800 text-neutral-400 hover:text-white rounded-lg border border-white/5 transition-colors flex items-center gap-2 text-xs"
+                      >
+                         {copiedPgp ? <Check size={14} className="text-green-500"/> : <Copy size={14}/>}
+                         {copiedPgp ? "Copied" : "Copy"}
+                      </button>
+                   </div>
+                   <pre className="bg-neutral-950 p-4 rounded-xl text-[10px] md:text-xs text-neutral-400 font-mono overflow-auto max-h-[400px] border border-white/5 select-all scrollbar-thin scrollbar-thumb-neutral-800 scrollbar-track-transparent">
+                      {PGP_PUBLIC_KEY}
+                   </pre>
+                </div>
+
+                <div className="mt-6 flex justify-end">
+                   <button 
+                      onClick={() => setShowPgp(false)}
+                      className="px-4 py-2 bg-white text-black font-medium text-sm rounded-lg hover:bg-neutral-200 transition-colors"
+                   >
+                      Close
+                   </button>
+                </div>
+             </div>
+          </div>
+        )}
       </div>
     );
   }
