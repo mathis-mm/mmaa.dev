@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { MapPin, ArrowUpRight, Copy, Terminal, LayoutGrid, GitCommit, BookOpen, GitBranch } from 'lucide-react';
+import { MapPin, ArrowUpRight, Copy, Terminal, BookOpen, GitBranch } from 'lucide-react';
 import { BentoCard } from './components/BentoCard';
 import { ArticleList } from './components/ArticleList';
-import { PROJECTS, STACK, SOCIALS, ARTICLES } from './constants';
+import { STACK, SOCIALS, ARTICLES } from './constants';
 import { ContentType } from './types';
 import { fetchLatestActivity, GithubActivity } from './services/githubService';
 
@@ -108,9 +108,6 @@ function App() {
   };
 
   const renderHome = () => {
-    // Select a secondary project to display (e.g., the second one)
-    const secondaryProject = PROJECTS[1];
-
     return (
     <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 gap-4 md:gap-6 auto-rows-[minmax(180px,auto)] max-w-7xl mx-auto relative z-10">
       
@@ -287,25 +284,9 @@ function App() {
         </div>
       </BentoCard>
 
-      {/* 4. Small Project (Dynamic) */}
-      <BentoCard className="md:col-span-1 md:row-span-1 relative group" href={secondaryProject?.link || '#'}>
-         <div className="absolute top-4 right-4 text-neutral-600 group-hover:text-white transition-colors">
-             <ArrowUpRight size={20} />
-         </div>
-         <div className="mt-auto">
-             <div className="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center mb-4">
-                 <LayoutGrid size={20} />
-             </div>
-             <h3 className="text-lg font-bold text-white mb-1">{secondaryProject?.title || 'Project'}</h3>
-             <span className="text-[10px] uppercase tracking-wider text-neutral-500 border border-neutral-800 px-2 py-0.5 rounded-full">
-                 {secondaryProject?.tags[0] || 'Dev'}
-             </span>
-         </div>
-      </BentoCard>
-
-      {/* 5. Articles Entry Card */}
+      {/* 5. Articles Entry Card (Expanded to fill row) */}
       <BentoCard 
-        className="md:col-span-1 md:row-span-1 cursor-pointer bg-neutral-850 hover:bg-neutral-800"
+        className="md:col-span-2 md:row-span-1 cursor-pointer bg-neutral-850 hover:bg-neutral-800"
       >
         <div onClick={() => setView(ContentType.ARTICLES)} className="h-full flex flex-col justify-between">
            <div className="flex items-center justify-between text-xs font-bold text-neutral-500 uppercase tracking-widest">
@@ -335,8 +316,8 @@ function App() {
         </p>
       </BentoCard>
 
-      {/* 7. Contact Card */}
-      <BentoCard className="md:col-span-1 md:row-span-1">
+      {/* 7. Contact Card (Expanded to fill row) */}
+      <BentoCard className="md:col-span-2 md:row-span-1">
          <div className="flex flex-col h-full justify-between">
             <div className="flex items-center justify-between">
                <div className="p-3 bg-neutral-800 rounded-full text-white">

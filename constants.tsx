@@ -1,6 +1,6 @@
 
 import { Github, Mail } from 'lucide-react';
-import { Project, SocialLink, StackItem } from './types';
+import { SocialLink, StackItem } from './types';
 import { ALL_ARTICLES } from './articles/index';
 
 export const SOCIALS: SocialLink[] = [
@@ -37,27 +37,6 @@ export const STACK: StackItem[] = [
   { name: 'VS Code', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vscode/vscode-original.svg' },
   { name: 'Neovim', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/neovim/neovim-original.svg' },
   { name: 'IntelliJ', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/intellij/intellij-original.svg' },
-];
-
-export const PROJECTS: Project[] = [
-  {
-    id: '1',
-    title: 'Nebula',
-    description: 'AI-driven analytics dashboard designed for scale. Real-time data processing with aesthetic visualizations.',
-    tags: ['React', 'D3.js', 'Python'],
-    imageUrl: 'https://picsum.photos/800/600?grayscale',
-    link: '#',
-    featured: true,
-  },
-  {
-    id: '3',
-    title: 'EtherWallet',
-    description: 'Non-custodial crypto wallet with social recovery features.',
-    tags: ['Web3', 'Solidity'],
-    imageUrl: 'https://picsum.photos/400/300?random=3',
-    link: '#',
-    featured: false,
-  }
 ];
 
 export const ARTICLES = ALL_ARTICLES;

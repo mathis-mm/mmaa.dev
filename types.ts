@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 export enum ContentType {
@@ -9,20 +10,10 @@ export interface Article {
   id: string;
   title: string;
   excerpt: string;
-  content: string
+  content: string; 
   date: string;
   readTime: string;
   tags: string[];
-}
-
-export interface Project {
-  id: string;
-  title: string;
-  description: string;
-  tags: string[];
-  imageUrl: string;
-  link: string;
-  featured?: boolean;
 }
 
 export interface SocialLink {
