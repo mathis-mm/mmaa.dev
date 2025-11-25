@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useRef } from 'react';
 import { MapPin, ArrowUpRight, Copy, Terminal, LayoutGrid, GitCommit, BookOpen, GitBranch } from 'lucide-react';
 import { BentoCard } from './components/BentoCard';
 import { ArticleList } from './components/ArticleList';
@@ -15,6 +16,10 @@ function App() {
   const [activeSlide, setActiveSlide] = useState(0); // 0 = Article, 1 = Github
   const [latestCommit, setLatestCommit] = useState<GithubActivity | null>(null);
   const [gitLoading, setGitLoading] = useState(true);
+
+  // Drag/Swipe Refs
+  const dragStartRef = useRef<number | null>(null);
+  const isDraggingRef = useRef(false);
 
   // Time effect for "Paris, FR" clock
   useEffect(() => {
@@ -40,17 +45,53 @@ function App() {
   }, []);
 
   // Slider Interval (30 seconds)
+  // Depends on activeSlide so it resets timer on manual interaction
   useEffect(() => {
     const interval = setInterval(() => {
       setActiveSlide(prev => (prev === 0 ? 1 : 0));
     }, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [activeSlide]);
 
   const handleCopyEmail = () => {
     navigator.clipboard.writeText('contact@mmaa.dev');
     setCopiedEmail(true);
     setTimeout(() => setCopiedEmail(false), 2000);
+  };
+
+  // --- SWIPE / DRAG HANDLERS ---
+  const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
+    isDraggingRef.current = false;
+    const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
+    dragStartRef.current = clientX;
+  };
+
+  const handleDragEnd = (e: React.MouseEvent | React.TouchEvent) => {
+    if (dragStartRef.current === null) return;
+    
+    const clientX = 'changedTouches' in e ? e.changedTouches[0].clientX : (e as React.MouseEvent).clientX;
+    const diff = dragStartRef.current - clientX;
+    
+    // Threshold for swipe (50px)
+    if (Math.abs(diff) > 50) {
+      isDraggingRef.current = true; // Mark as drag so we don't trigger click events
+      if (diff > 0) {
+        // Swiped Left -> Next Slide (1)
+        setActiveSlide(1);
+      } else {
+        // Swiped Right -> Prev Slide (0)
+        setActiveSlide(0);
+      }
+    }
+    
+    dragStartRef.current = null;
+  };
+
+  const handleArticleClick = () => {
+    // Only open article if we didn't just drag/swipe
+    if (!isDraggingRef.current) {
+      setView(ContentType.ARTICLES);
+    }
   };
 
   // Helper for blinking colon logic
@@ -75,18 +116,23 @@ function App() {
       
       {/* 1. Featured Work Slider (Latest Article & Real GitHub Push) */}
       <BentoCard 
-        className="md:col-span-2 md:row-span-2 min-h-[400px] group overflow-hidden" 
+        className="md:col-span-2 md:row-span-2 min-h-[400px] group overflow-hidden select-none" 
         noPadding
       >
-        {/* Slider Container */}
+        {/* Slider Container with Drag Events */}
         <div 
-          className="flex w-full h-full transition-transform duration-1000 ease-in-out" 
+          className="flex w-full h-full transition-transform duration-1000 ease-in-out cursor-grab active:cursor-grabbing" 
           style={{ transform: `translateX(-${activeSlide * 100}%)` }}
+          onMouseDown={handleDragStart}
+          onMouseUp={handleDragEnd}
+          onMouseLeave={handleDragEnd}
+          onTouchStart={handleDragStart}
+          onTouchEnd={handleDragEnd}
         >
           {/* SLIDE 1: Article */}
           <div className="min-w-full h-full relative bg-neutral-900">
             <div 
-              onClick={() => setView(ContentType.ARTICLES)}
+              onClick={handleArticleClick}
               className="cursor-pointer absolute inset-0 z-0 hover:scale-105 transition-transform duration-700"
             >
                {/* Abstract background gradient instead of image */}
@@ -108,7 +154,7 @@ function App() {
                   <p className="text-neutral-300 text-sm line-clamp-2 max-w-sm drop-shadow-md mb-4">
                     {ARTICLES[0].excerpt}
                   </p>
-                  <button onClick={() => setView(ContentType.ARTICLES)} className="text-xs text-white underline decoration-purple-500 underline-offset-4 hover:text-purple-300 transition-colors">
+                  <button onClick={handleArticleClick} className="text-xs text-white underline decoration-purple-500 underline-offset-4 hover:text-purple-300 transition-colors">
                     Read article
                   </button>
               </div>
@@ -123,7 +169,7 @@ function App() {
                 backgroundSize: '20px 20px' 
             }}></div>
 
-            <div className="relative z-10 flex flex-col h-full justify-between">
+            <div className="relative z-10 flex flex-col h-full justify-between pointer-events-none">
                <div className="flex justify-between items-start">
                   <div className="px-3 py-1 bg-green-500/10 text-green-400 text-xs font-bold rounded-full border border-green-500/20 backdrop-blur-sm uppercase tracking-wider flex items-center gap-2">
                     <span className="relative flex h-2 w-2">
@@ -134,7 +180,7 @@ function App() {
                   </div>
                </div>
 
-               <div className="flex-1 flex items-center justify-center">
+               <div className="flex-1 flex items-center justify-center pointer-events-auto">
                   <div className="w-full bg-[#161b22] border border-[#30363d] rounded-xl p-5 shadow-2xl relative overflow-hidden">
                      {latestCommit ? (
                         <>
