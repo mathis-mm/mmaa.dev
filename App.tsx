@@ -44,12 +44,12 @@ function App() {
     });
   }, []);
 
-  // Slider Interval (30 seconds)
+  // Slider Interval (10 seconds)
   // Depends on activeSlide so it resets timer on manual interaction
   useEffect(() => {
     const interval = setInterval(() => {
       setActiveSlide(prev => (prev === 0 ? 1 : 0));
-    }, 30000);
+    }, 10000);
     return () => clearInterval(interval);
   }, [activeSlide]);
 
