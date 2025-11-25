@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { MapPin, ArrowUpRight, Copy, Terminal, BookOpen, GitBranch } from 'lucide-react';
+import { MapPin, ArrowUpRight, Copy, Terminal, BookOpen, GitBranch, Fingerprint } from 'lucide-react';
 import { BentoCard } from './components/BentoCard';
 import { ArticleList } from './components/ArticleList';
 import { STACK, SOCIALS, ARTICLES } from './constants';
@@ -233,28 +233,8 @@ function App() {
         </div>
       </BentoCard>
 
-      {/* 2. Location & Time Card */}
-      <BentoCard className="md:col-span-1 md:row-span-1 flex flex-col justify-between group">
-         <div>
-            <div className="flex items-center gap-2 text-xs font-bold text-neutral-500 uppercase tracking-widest mb-4">
-               <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-               Base
-            </div>
-            <div className="flex items-center gap-2 text-neutral-300 mb-1">
-                <MapPin size={16} />
-                <span className="font-medium">Paris, FR</span>
-            </div>
-         </div>
-         <div>
-            <div className="text-4xl md:text-5xl font-bold text-white tracking-tight font-mono">
-                {renderClock()}
-            </div>
-            <div className="text-xs text-neutral-500 mt-1">Local time</div>
-         </div>
-      </BentoCard>
-
-      {/* 3. Stack Card - Infinite Scrolling */}
-      <BentoCard className="md:col-span-1 md:row-span-1 overflow-hidden" noPadding>
+      {/* 2. Stack Card - Infinite Scrolling */}
+      <BentoCard className="md:col-span-2 md:row-span-1 overflow-hidden" noPadding>
         <div className="p-6 pb-0">
            <div className="flex items-center gap-2 text-xs font-bold text-neutral-500 uppercase tracking-widest mb-2">
                <Terminal size={14} /> Tools
@@ -284,7 +264,7 @@ function App() {
         </div>
       </BentoCard>
 
-      {/* 5. Articles Entry Card (Expanded to fill row) */}
+      {/* 3. Articles Entry Card (Expanded to fill row) */}
       <BentoCard 
         className="md:col-span-2 md:row-span-1 cursor-pointer bg-neutral-850 hover:bg-neutral-800"
       >
@@ -306,17 +286,26 @@ function App() {
         </div>
       </BentoCard>
 
-      {/* 6. About / Quote */}
-      <BentoCard className="md:col-span-2 md:row-span-1 flex flex-col justify-center bg-gradient-to-r from-neutral-900 to-neutral-850">
-        <div className="flex items-center gap-2 text-xs font-bold text-neutral-500 uppercase tracking-widest mb-2">
-           About
+      {/* 4. About Me - Redesigned */}
+      <BentoCard className="md:col-span-2 md:row-span-1 relative overflow-hidden group">
+        <div className="absolute -right-6 -bottom-6 text-neutral-800 opacity-20 group-hover:opacity-30 transition-opacity duration-500 rotate-12">
+            <Fingerprint size={140} />
         </div>
-        <p className="text-xl md:text-2xl font-medium text-white leading-relaxed">
-          "Developer and cybersecurity explorer."
-        </p>
+        
+        <div className="flex flex-col justify-between h-full relative z-10">
+            <div className="flex items-center gap-2 text-xs font-bold text-purple-500 uppercase tracking-widest mb-2">
+               About Me
+            </div>
+            <p className="text-lg md:text-2xl font-medium text-white leading-relaxed">
+              <span className="text-neutral-500">Full-stack</span> developer <span className="text-neutral-500">passionate about</span> software, networks, and secure environments.
+            </p>
+            <p className="text-sm text-neutral-400 mt-2 max-w-xs">
+              I design and develop robust applications with a strong focus on software engineering, network architecture, and cybersecurity best practices, ensuring high performance and secure, maintainable solutions.
+            </p>
+        </div>
       </BentoCard>
 
-      {/* 7. Contact Card (Expanded to fill row) */}
+      {/* 5. Contact Card (Expanded to fill row) */}
       <BentoCard className="md:col-span-2 md:row-span-1">
          <div className="flex flex-col h-full justify-between">
             <div className="flex items-center justify-between">
