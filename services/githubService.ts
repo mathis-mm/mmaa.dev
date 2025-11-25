@@ -1,3 +1,4 @@
+
 export interface GithubActivity {
   type: 'push' | 'other';
   repoName: string;
@@ -9,70 +10,80 @@ export interface GithubActivity {
 
 export const fetchLatestActivity = async (username: string): Promise<GithubActivity | null> => {
   try {
-    // Add timestamp to prevent caching issues
-    const res = await fetch(`https://api.github.com/users/${username}/events/public?t=${Date.now()}`);
-    if (!res.ok) throw new Error('Failed to fetch github events');
-    const events = await res.json();
+    // STRAT 1
+    const eventsRes = await fetch(`https://api.github.com/users/${username}/events/public?t=${Date.now()}`);
     
-    for (const event of events) {
-        const repoName = event.repo.name;
-        const date = new Date(event.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-
-        // Handle PushEvent
-        if (event.type === 'PushEvent') {
-            const commits = event.payload.commits;
-            const branch = event.payload.ref?.replace('refs/heads/', '') || 'main';
-            
-            if (Array.isArray(commits) && commits.length > 0) {
-                // The API lists commits in the push. The last one is the most recent 'head' of that push.
-                const latestCommit = commits[commits.length - 1];
-                return {
-                    type: 'push',
-                    repoName,
-                    message: latestCommit.message || "No commit message provided",
-                    url: `https://github.com/${repoName}/commit/${latestCommit.sha}`,
-                    date,
-                    branch
-                };
-            } else {
-                // Fallback
-                return {
-                    type: 'push',
-                    repoName,
-                    message: `Updated branch ${branch}`,
-                    url: `https://github.com/${repoName}/tree/${branch}`,
-                    date,
-                    branch
-                };
-            }
-        }
-
-        // Handle CreateEvent (Repositories)
-        if (event.type === 'CreateEvent' && event.payload.ref_type === 'repository') {
-             return {
-                type: 'other',
-                repoName,
-                message: 'Created a new repository',
-                url: `https://github.com/${repoName}`,
-                date,
-                branch: event.payload.master_branch || 'main'
-             };
-        }
+    if (eventsRes.ok) {
+        const events = await eventsRes.json();
         
-        // Handle PullRequestEvent
-        if (event.type === 'PullRequestEvent' && event.payload.action === 'opened') {
-             return {
-                type: 'other',
-                repoName,
-                message: `Opened PR: ${event.payload.pull_request.title}`,
-                url: event.payload.pull_request.html_url,
-                date,
-                branch: 'PR'
-             };
+        for (const event of events) {
+            const repoName = event.repo.name;
+            const date = new Date(event.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+            if (event.type === 'PushEvent') {
+                const branch = event.payload.ref?.replace('refs/heads/', '') || 'main';
+                const commits = event.payload.commits;
+                
+                if (Array.isArray(commits) && commits.length > 0) {
+                    const latestCommit = commits[commits.length - 1];
+                    return {
+                        type: 'push',
+                        repoName,
+                        message: latestCommit.message,
+                        url: `https://github.com/${repoName}/commit/${latestCommit.sha}`,
+                        date,
+                        branch
+                    };
+                } 
+                else if (event.payload.head) {
+                    try {
+                        const commitRes = await fetch(`https://api.github.com/repos/${repoName}/commits/${event.payload.head}`);
+                        if (commitRes.ok) {
+                            const commitData = await commitRes.json();
+                            return {
+                                type: 'push',
+                                repoName,
+                                message: commitData.commit.message,
+                                url: commitData.html_url,
+                                date,
+                                branch
+                            };
+                        }
+                    } catch (e) {
+                        console.warn("Failed to fetch specific commit details, skipping event.");
+                    }
+                }
+            }
         }
     }
     
-    return null;
+    // STRAT2
+    const reposRes = await fetch(`https://api.github.com/users/${username}/repos?sort=updated&per_page=1&t=${Date.now()}`);
+    if (!reposRes.ok) return null;
+    
+    const repos = await reposRes.json();
+    if (!repos || repos.length === 0) return null;
+    
+    const latestRepo = repos[0];
+    const fullRepoName = latestRepo.full_name;
+    
+    const commitsRes = await fetch(`https://api.github.com/repos/${fullRepoName}/commits?per_page=1&t=${Date.now()}`);
+    if (!commitsRes.ok) return null;
+    
+    const commits = await commitsRes.json();
+    if (!commits || commits.length === 0) return null;
+    
+    const latestCommit = commits[0];
+    
+    return {
+        type: 'push',
+        repoName: fullRepoName,
+        message: latestCommit.commit.message,
+        url: latestCommit.html_url,
+        date: new Date(latestCommit.commit.author.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        branch: latestRepo.default_branch
+    };
+
   } catch (err) {
     console.warn("GitHub fetch error:", err);
     return null;
